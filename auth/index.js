@@ -1,16 +1,27 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-import fetch from 'node-fetch'
-export default async function(context, req) {
-  const rest = context.bindingData.rest || ''
-  const target = \`https://4.231.232.226:8443/auth/\${rest}\`
-  const resp = await fetch(target, {
+const fetch = require('node-fetch');
+
+module.exports = async function (context, req) {
+  const url = `${process.env.SUPABASE_URL}/auth/v1/${req.params.rest}` +
+              (req.originalUrl.includes('?') ? '' : '') +
+              req.originalUrl.split('?')[1] || '';
+  const init = {
     method: req.method,
-    headers: { ...req.headers, host: '4.231.232.226:8443' },
-    body: ['GET','HEAD','OPTIONS'].includes(req.method) ? undefined : req.rawBody
-  })
+    headers: {
+      apikey: process.env.SUPABASE_ANON_KEY,
+      authorization: req.headers.authorization || `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      'content-type': req.headers['content-type'] || 'application/json'
+    },
+    body: ['GET','OPTIONS'].includes(req.method) ? undefined : JSON.stringify(req.body)
+  };
+
+  const resp = await fetch(url, init);
+  const body = await resp.text();
   context.res = {
     status: resp.status,
-    headers: Object.fromEntries(resp.headers.entries()),
-    body: await resp.buffer()
-  }
-}
+    headers: {
+      ...(resp.headers.raw()),
+      'Access-Control-Allow-Origin': '*'
+    },
+    body
+  };
+};
