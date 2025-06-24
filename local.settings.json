@@ -1,9 +1,9 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "node",
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "SUPABASE_URL": "http://localhost:8000",
-    "SUPABASE_ANON_KEY": "ta_anon_key_ici"
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "SUPABASE_URL": "http://4.231.232.226:8000",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24ifQ.5EXnvsDuteyWfP4IzO8F_9T0bMy1rUzN0bBaPaW18Ws"
   }
 }
