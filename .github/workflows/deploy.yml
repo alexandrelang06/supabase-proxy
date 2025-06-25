@@ -6,21 +6,17 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Archive Files
-        run: |
-          zip -r functionapp.zip host.json package.json package-lock.json auth rest
 
       - name: Deploy to Azure Functions
         uses: azure/functions-action@v1
         with:
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           app-name: itfw-proxy-func
-          package: functionapp.zip
-          enable-oryx-build: false
-          scm-do-build-during-deployment: false
+          package: '.'               # << indique à l’action de prendre tout le repo
+          enable-oryx-build: false   # on désactive le build Oryx
+          scm-do-build-during-deployment: false  # on ne veut pas npm install côté Kudu
