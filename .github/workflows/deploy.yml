@@ -2,8 +2,7 @@ name: CI/CD Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -20,9 +19,6 @@ jobs:
 
       - name: Installer les dépendances
         run: npm install
-
-      - name: (Optionnel) Build
-        run: npm run build
 
       - name: Déployer sur Azure Functions
         uses: azure/functions-action@v1
