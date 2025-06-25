@@ -14,17 +14,22 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installe tes dépendances (pas de build)
+      # 2) Installe les dépendances (si besoin d'appeler npm dans ton code)
       - name: 🧩 npm install
         run: npm install
 
-      # 3) Prépare l’archive ZIP sans node_modules ni secrets
+      # 3) Crée functionapp.zip EXPLICITEMENT avec tout ce qu'il faut
       - name: 📦 Créer functionapp.zip
         run: |
-            zip -r functionapp.zip . \
-                -x "node_modules/*" ".github/*" "proxy.zip" "local.settings.json"
+          rm -f functionapp.zip
+          zip -r functionapp.zip \
+            host.json package.json package-lock.json auth rest node_modules
 
-      # 4) Déploie via le publish-profile stocké dans tes secrets
+      # 4) Vérifie le contenu du ZIP pour t’assurer qu’il n’est pas vide
+      - name: 🔍 Lister le contenu du ZIP
+        run: unzip -l functionapp.zip
+
+      # 5) Déploie sur ta Function App via le publish-profile stocké en secret
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
