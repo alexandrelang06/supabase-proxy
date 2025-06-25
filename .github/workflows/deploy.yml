@@ -2,34 +2,32 @@ name: Déploiement Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Récupère ton code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installe les dépendances (si besoin d'appeler npm dans ton code)
+      - name: 🔐 Vérifier le secret
+        run: |
+          echo "${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}" | head -n1
+
       - name: 🧩 npm install
         run: npm install
 
-      # 3) Crée functionapp.zip EXPLICITEMENT avec tout ce qu'il faut
       - name: 📦 Créer functionapp.zip
         run: |
           rm -f functionapp.zip
           zip -r functionapp.zip \
             host.json package.json package-lock.json auth rest node_modules
 
-      # 4) Vérifie le contenu du ZIP pour t’assurer qu’il n’est pas vide
       - name: 🔍 Lister le contenu du ZIP
         run: unzip -l functionapp.zip
 
-      # 5) Déploie sur ta Function App via le publish-profile stocké en secret
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
