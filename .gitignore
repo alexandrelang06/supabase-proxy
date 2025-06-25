@@ -1,5 +1,15 @@
+# dépendances Node.js
 node_modules/
+
+# archive(s) de déploiement
 proxy.zip
+functionapp.zip
+
+# config locale (ne jamais versionner tes secrets)
 local.settings.json
+
+# macOS
 .DS_Store
+
+# variables d’environnement
 .env
