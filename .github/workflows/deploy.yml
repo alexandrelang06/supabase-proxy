@@ -17,3 +17,4 @@ jobs:
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           enable-oryx-build: true
           scm-do-build-during-deployment: true
+#
