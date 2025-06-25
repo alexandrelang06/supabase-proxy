@@ -10,36 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installe toutes les dépendances pour inclure node_modules
-      - name: 🧩 npm ci
-        run: npm ci
-
-      # 3) Crée un ZIP complet (code + modules)
-      - name: 📦 Créer functionapp.zip
-        run: |
-          rm -f functionapp.zip
-          zip -r functionapp.zip . \
-            -x ".git/*" "local.settings.json" ".github/*"
-
-      # 4) Diagnostic rapide
-      - name: 📋 Diagnostic du ZIP
-        run: |
-          echo "---- Taille du ZIP ----"
-          ls -lh functionapp.zip
-          echo "---- Contenu du ZIP ----"
-          unzip -l functionapp.zip
-
-      # 5) Déploiement
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
-          package: functionapp.zip
-          # on laisse Kudu/Oryx gérer le build
-          scm-do-build-during-deployment: true
           enable-oryx-build: true
+          scm-do-build-during-deployment: true
+        env:
+          AZURE_FUNCTION_APP_LOG_LEVEL: verbose
