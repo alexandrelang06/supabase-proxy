@@ -10,23 +10,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1) Récupérer le code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
+      # 2) Se logguer dans Azure
       - name: 🔐 Login Azure CLI
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 📦 Zip, upload & config Run-From-Package
-        uses: azure/CLI@v1
+      # 3) Zip + upload + config Run-From-Package
+      - name: 📦 Zip et deploy via Storage
+        uses: azure/cli@v1
         with:
           inlineScript: |
+            set -e
             ZIP=functionapp.zip
+            # créer un ZIP propre
             zip -r $ZIP auth rest host.json package.json package-lock.json
-            az storage blob upload --container-name releases --name app.zip --file $ZIP --auth-mode key
-            SAS=$(az storage blob generate-sas --container-name releases --name app.zip --permissions r --expiry "$(date -u -d '+1 hour' +'%Y-%m-%dT%H:%MZ')" -o tsv)
-            az functionapp config appsettings set --name itfw-proxy-func --resource-group CapabilityFrameworkTool --settings WEBSITE_RUN_FROM_PACKAGE="https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/releases/app.zip?${SAS}"
+            # téléverser dans le storage
+            az storage blob upload \
+              --container-name releases \
+              --name app.zip \
+              --file $ZIP \
+              --auth-mode key
+            # générer un SAS 1h
+            SAS=$(az storage blob generate-sas \
+              --container-name releases \
+              --name app.zip \
+              --permissions r \
+              --expiry "$(date -u -d '+1 hour' +'%Y-%m-%dT%H:%MZ')" \
+              -o tsv)
+            # configurer la Function App pour qu’elle tourne en Run-From-Package
+            az functionapp config appsettings set \
+              --name itfw-proxy-func \
+              --resource-group CapabilityFrameworkTool \
+              --settings WEBSITE_RUN_FROM_PACKAGE="https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/releases/app.zip?${SAS}"
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+          AZURE_STORAGE_KEY:     ${{ secrets.AZURE_STORAGE_KEY }}
