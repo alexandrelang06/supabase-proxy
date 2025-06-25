@@ -2,35 +2,32 @@ name: Déploiement Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Récupère ton code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installe tes dépendances (pour lockfile, pas de build à l’avance)
-      - name: 🧩 npm ci
+      - name: 🧩 Installer les dépendances
         run: npm ci
 
-      # 3) Crée l’archive ZIP sans node_modules ni secrets
       - name: 📦 Créer functionapp.zip
         run: |
           rm -f functionapp.zip
-          zip -r functionapp.zip . \
-            -x "node_modules/*" ".github/*" "local.settings.json" ".env"
+          zip -r functionapp.zip \
+            host.json \
+            auth/ rest/ package.json package-lock.json \
+            -x "node_modules/*" ".git/*" "local.settings.json" ".env" ".github/*"
 
-      # 4) Déploie avec ton publish-profile
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           package: functionapp.zip
-          scm-do-build-during-deployment: true    # laisse Kudu installer & build
-          enable-oryx-build: true                 # active Oryx pour Node.js
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
