@@ -2,8 +2,7 @@ name: CI/CD Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -17,6 +16,6 @@ jobs:
         with:
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           app-name: itfw-proxy-func
-          package: '.'               # << indique à l’action de prendre tout le repo
-          enable-oryx-build: false   # on désactive le build Oryx
-          scm-do-build-during-deployment: false  # on ne veut pas npm install côté Kudu
+          package: '.'                            # tout le repo
+          enable-oryx-build: true                 # active npm install via Oryx
+          scm-do-build-during-deployment: true    # idem
