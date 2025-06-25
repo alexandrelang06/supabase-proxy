@@ -21,8 +21,8 @@ jobs:
       # 3) Prépare l’archive ZIP sans node_modules ni secrets
       - name: 📦 Créer functionapp.zip
         run: |
-          zip -r functionapp.zip . \
-            -x ".github/*" "proxy.zip" "local.settings.json"
+            zip -r functionapp.zip . \
+                -x "node_modules/*" ".github/*" "proxy.zip" "local.settings.json"
 
       # 4) Déploie via le publish-profile stocké dans tes secrets
       - name: 🚀 Déploiement Azure Functions
