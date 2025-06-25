@@ -12,15 +12,20 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
+      - name: 🔐 Login Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: 📦 Créer functionapp.zip
         run: |
           zip -r functionapp.zip \
             auth rest host.json package.json package-lock.json \
             -x "node_modules/*" ".github/*" "local.settings.json" "*.zip"
 
-      - name: 🚀 Déploiement via WebApps Deploy
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: itfw-proxy-func
-          package: functionapp.zip
-          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
+      - name: 🚀 Zip Deploy via Azure CLI
+        run: |
+          az webapp deployment source config-zip \
+            --name itfw-proxy-func \
+            --resource-group CapabilityFrameworkTool \
+            --src functionapp.zip
