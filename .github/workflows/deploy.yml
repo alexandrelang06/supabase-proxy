@@ -1,4 +1,4 @@
-name: CI/CD Azure Function
+name: Déploiement Azure Functions
 
 on:
   push:
@@ -9,15 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Build (si tu as un build step)
-      run: |
-        npm install
-        npm run build   # si tu n’as pas de script build, supprime ces lignes
+    # Installe juste les dépendances, sans tenter de 'build'
+    - name: Install dependencies
+      run: npm install
 
-    - name: Deploy to Azure Functions via Publish Profile
+    - name: Deploy sur Azure Functions
       uses: azure/functions-action@v1
       with:
         app-name: itfw-proxy-func
