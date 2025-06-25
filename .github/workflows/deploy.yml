@@ -16,6 +16,5 @@ jobs:
         with:
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           app-name: itfw-proxy-func
-          package: '.'                            # tout le repo
-          enable-oryx-build: true                 # active npm install via Oryx
-          scm-do-build-during-deployment: true    # idem
+          package: '.'            # déploie tout ton repo
+          remote-build: true      # build Oryx *dans* Azure
