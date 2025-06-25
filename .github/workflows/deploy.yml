@@ -10,24 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout du code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Création du ZIP propre
+      - name: 🐛 Afficher le workflow
+        run: cat .github/workflows/deploy.yml
+
       - name: 📦 Créer functionapp.zip
         run: |
           zip -r functionapp.zip \
             auth rest host.json package.json package-lock.json \
             -x "node_modules/*" ".github/*" "local.settings.json" "*.zip"
 
-      # 3) Vérifier l’existence et le contenu du ZIP
       - name: 🔍 Vérifier le ZIP
         run: |
           ls -lh functionapp.zip
           unzip -l functionapp.zip | head -n 20
 
-      # 4) Déployer via publish-profile sans build Kudu/Oryx
       - name: 🚀 Déploiement via publish-profile
         uses: azure/functions-action@v1
         with:
