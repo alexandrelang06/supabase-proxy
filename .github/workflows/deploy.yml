@@ -10,27 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Récupérer le code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Générer un ZIP « propre »
-      #    On inclut seulement les dossiers auth/ et rest/,
-      #    plus host.json et package*.json
-      #    On exclut node_modules, .github, local.settings.json, et tout autre ZIP
       - name: 📦 Créer functionapp.zip
         run: |
           zip -r functionapp.zip \
             auth rest host.json package.json package-lock.json \
             -x "node_modules/*" ".github/*" "local.settings.json" "*.zip"
 
-      # 3) Déployer sur Azure en Run-From-Package sans build Oryx/Kudu
-      #    On utilise le publish-profile stocké dans le secret
-      - name: 🚀 Déploiement Azure Functions via publish-profile
+      - name: 🚀 Déploiement via publish-profile
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           package: functionapp.zip
-          scm-do-build-during-deployment: false  # pas de build Kudu
-          enable-oryx-build: false               # pas de build Oryx
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
