@@ -9,25 +9,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-
-      # 1) Récupère ton code
+      # 1) Check out code
       - uses: actions/checkout@v3
 
-      # 2) Installe Node
+      # 2) Setup Node.js
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3) Installe les dépendances
+      # 3) Install dependencies
       - run: npm install
 
-      # 4) Authenticate against Azure using the Publish Profile
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
-      # 5) Déploiement
+      # 4) Deploy with the publish profile
       - name: Déployer sur Azure Functions
         uses: azure/functions-action@v1
         with:
