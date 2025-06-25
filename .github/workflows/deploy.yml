@@ -13,12 +13,16 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      - name: 🚀 Déploiement Azure Functions
+      - name: 📦 Générer le ZIP de déploiement
+        run: |
+          zip -r functionapp-deploy.zip auth rest host.json package.json package-lock.json \
+            -x "node_modules/*" ".github/*" "local.settings.json" "*.zip" "zip-inspect/*"
+
+      - name: 🚀 Déployer sur Azure sans build
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
-          enable-oryx-build: true
-          scm-do-build-during-deployment: true
-        env:
-          AZURE_FUNCTION_APP_LOG_LEVEL: verbose
+          package: functionapp-deploy.zip
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
