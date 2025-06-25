@@ -22,7 +22,7 @@ jobs:
       - name: 📦 Créer functionapp.zip
         run: |
           zip -r functionapp.zip . \
-            -x "node_modules/*" ".github/*" "proxy.zip" "local.settings.json"
+            -x ".github/*" "proxy.zip" "local.settings.json"
 
       # 4) Déploie via le publish-profile stocké dans tes secrets
       - name: 🚀 Déploiement Azure Functions
