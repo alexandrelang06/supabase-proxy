@@ -21,3 +21,5 @@ jobs:
         app-name: itfw-proxy-func
         publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
         package: .
+        enable-oryx-build: true             # <-- active le build Oryx (npm install)
+        scm-do-build-during-deployment: true # <-- permet à Kudu de lancer `npm install`
