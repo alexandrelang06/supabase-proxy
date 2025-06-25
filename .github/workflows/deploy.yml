@@ -2,21 +2,33 @@ name: CI/CD Azure Functions
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+
+      # 1) Récupère ton code
       - uses: actions/checkout@v3
 
+      # 2) Installe Node
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      # 3) Installe les dépendances
       - run: npm install
 
-      - name: Déploiement sur Azure Functions
+      # 4) Authenticate against Azure using the Publish Profile
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      # 5) Déploiement
+      - name: Déployer sur Azure Functions
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
