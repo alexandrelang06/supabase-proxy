@@ -14,39 +14,23 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Se logguer dans Azure
-      - name: 🔐 Login Azure CLI
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # 2) Générer un ZIP « propre »
+      #    On inclut seulement les dossiers auth/ et rest/,
+      #    plus host.json et package*.json
+      #    On exclut node_modules, .github, local.settings.json, et tout autre ZIP
+      - name: 📦 Créer functionapp.zip
+        run: |
+          zip -r functionapp.zip \
+            auth rest host.json package.json package-lock.json \
+            -x "node_modules/*" ".github/*" "local.settings.json" "*.zip"
 
-      # 3) Zip + upload + config Run-From-Package
-      - name: 📦 Zip et deploy via Storage
-        uses: azure/cli@v1
+      # 3) Déployer sur Azure en Run-From-Package sans build Oryx/Kudu
+      #    On utilise le publish-profile stocké dans le secret
+      - name: 🚀 Déploiement Azure Functions via publish-profile
+        uses: azure/functions-action@v1
         with:
-          inlineScript: |
-            set -e
-            ZIP=functionapp.zip
-            # créer un ZIP propre
-            zip -r $ZIP auth rest host.json package.json package-lock.json
-            # téléverser dans le storage
-            az storage blob upload \
-              --container-name releases \
-              --name app.zip \
-              --file $ZIP \
-              --auth-mode key
-            # générer un SAS 1h
-            SAS=$(az storage blob generate-sas \
-              --container-name releases \
-              --name app.zip \
-              --permissions r \
-              --expiry "$(date -u -d '+1 hour' +'%Y-%m-%dT%H:%MZ')" \
-              -o tsv)
-            # configurer la Function App pour qu’elle tourne en Run-From-Package
-            az functionapp config appsettings set \
-              --name itfw-proxy-func \
-              --resource-group CapabilityFrameworkTool \
-              --settings WEBSITE_RUN_FROM_PACKAGE="https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/releases/app.zip?${SAS}"
-        env:
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY:     ${{ secrets.AZURE_STORAGE_KEY }}
+          app-name: itfw-proxy-func
+          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
+          package: functionapp.zip
+          scm-do-build-during-deployment: false  # pas de build Kudu
+          enable-oryx-build: false               # pas de build Oryx
