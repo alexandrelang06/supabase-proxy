@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout du code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installe tes dépendances locales pour générer le ZIP
       - name: 🧩 npm ci
         run: npm ci
 
-      # 3) Crée explicitement le ZIP avec seulement ce qu’il faut
       - name: 📦 Créer functionapp.zip
         run: |
           rm -f functionapp.zip
@@ -29,19 +26,18 @@ jobs:
             auth \
             rest
 
-      # 4) Diagnostic : vérifie que le ZIP est bien rempli
       - name: 🕵️ Diagnostic ZIP
         run: |
+          echo "---- Taille du ZIP ----"
           ls -lh functionapp.zip
+          echo "---- Contenu du ZIP ----"
           unzip -l functionapp.zip
 
-      # 5) Déploiement dans ta Function App via publish-profile
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
           app-name: itfw-proxy-func
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
           package: functionapp.zip
-          # On laisse Kudu lancer `npm install` pour reconstruire en prod
           scm-do-build-during-deployment: true
           enable-oryx-build: true
