@@ -1,31 +1,19 @@
-name: Déploiement Azure Functions
+name: CI/CD Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: 🔐 Login Azure CLI
-        uses: azure/login@v1
+      - name: Build & Deploy Azure Functions
+        uses: azure/functions-action@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: 📦 Créer functionapp.zip
-        run: |
-          zip -r functionapp.zip \
-            auth rest host.json package.json package-lock.json \
-            -x "node_modules/*" ".github/*" "local.settings.json" "*.zip"
-
-      - name: 🚀 Zip Deploy via Azure CLI
-        run: |
-          az webapp deployment source config-zip \
-            --name itfw-proxy-func \
-            --resource-group CapabilityFrameworkTool \
-            --src functionapp.zip
+          app-name: itfw-proxy-func
+          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
+          enable-oryx-build: true
+          scm-do-build-during-deployment: true
