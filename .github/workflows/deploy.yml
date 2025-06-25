@@ -9,22 +9,18 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1) Checkout du code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Archive le contenu dans functionapp.zip
       - name: Archive Files
         run: |
           zip -r functionapp.zip host.json package.json package-lock.json auth rest
 
-      # 3) Déployer sur Azure Functions via Kudu (publish profile)
       - name: Deploy to Azure Functions
         uses: azure/functions-action@v1
         with:
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
           app-name: itfw-proxy-func
           package: functionapp.zip
-          enable-oryx-build: false        # N’exécute pas npm install en Kudu
+          enable-oryx-build: false
           scm-do-build-during-deployment: false
-
