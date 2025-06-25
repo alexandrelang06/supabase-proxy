@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout
+      # 1) Récupère ton code
       - name: 📥 Checkout
         uses: actions/checkout@v3
 
-      # 2) Installer les dépendances
+      # 2) Installe tes dépendances
       - name: 🧩 npm ci
         run: npm ci
 
-      # 3) Créer functionapp.zip avec uniquement les fichiers nécessaires
+      # 3) Crée functionapp.zip
       - name: 📦 Créer functionapp.zip
         run: |
           rm -f functionapp.zip
@@ -29,15 +29,15 @@ jobs:
             auth \
             rest
 
-      # 4) Diagnostic : vérifie la taille et le contenu du ZIP
-      - name: 🕵️ Diagnostic ZIP
+      # 4) Diagnostic : taille + contenu du ZIP
+      - name: 🕵️ Diagnostic du ZIP
         run: |
           echo "---- Taille du ZIP ----"
           ls -lh functionapp.zip
           echo "---- Contenu du ZIP ----"
           unzip -l functionapp.zip
 
-      # 5) Déploiement sur Azure
+      # 5) Déploie via publish-profile
       - name: 🚀 Déploiement Azure Functions
         uses: azure/functions-action@v1
         with:
