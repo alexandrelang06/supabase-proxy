@@ -1,29 +1,25 @@
-name: CI/CD Azure Functions
+name: CI/CD Azure Function
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1) Check out code
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2) Setup Node.js
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+    - name: Build (si tu as un build step)
+      run: |
+        npm install
+        npm run build   # si tu n’as pas de script build, supprime ces lignes
 
-      # 3) Install dependencies
-      - run: npm install
-
-      # 4) Deploy with the publish profile
-      - name: Déployer sur Azure Functions
-        uses: azure/functions-action@v1
-        with:
-          app-name: itfw-proxy-func
-          package: .
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+    - name: Deploy to Azure Functions via Publish Profile
+      uses: azure/functions-action@v1
+      with:
+        app-name: itfw-proxy-func
+        publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
+        package: .
