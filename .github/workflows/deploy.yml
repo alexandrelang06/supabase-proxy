@@ -2,24 +2,36 @@ name: Déploiement Azure Functions
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      # 1. Récupérer le code
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: npm install
+      # 2. Installer Node et les dépendances
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
 
-    - name: Déployer sur Azure Functions
-      uses: azure/functions-action@v1
-      with:
-        app-name: itfw-proxy-func
-        publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_PROFILE }}
-        package: .
-        enable-oryx-build: true             # <-- active le build Oryx (npm install)
-        scm-do-build-during-deployment: true # <-- permet à Kudu de lancer `npm install`
+      # 3. Archiver tout le répertoire (incl. node_modules)
+      - name: Zip function app
+        run: |
+          zip -r functionapp.zip . 
+
+      # 4. Déployer sur Azure Functions via Kudu en se basant sur le Publish Profile
+      - name: Deploy to Azure Functions
+        uses: azure/functions-action@v1
+        with:
+          creds: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          app-name: itfw-proxy-func
+          package: functionapp.zip
+          enable-oryx-build: false        # on ne veut pas qu'Oryx refasse npm install
+          scm-do-build-during-deployment: false
